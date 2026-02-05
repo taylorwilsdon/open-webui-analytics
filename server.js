@@ -54,6 +54,7 @@ app.use(cors({
   credentials: true
 }))
 app.use(express.json())
+app.use(express.static(join(__dirname, 'dist')))
 
 // Setup routes
 if (setupMode) {
@@ -579,6 +580,7 @@ app.get('/api/stats/tools', async (req, res) => {
 } // End of non-setup mode
 
 const PORT = process.env.PORT || 3001
+app.get('*', (req, res) => res.sendFile(join(__dirname, 'dist', 'index.html')))
 app.listen(PORT, () => {
   if (setupMode) {
     console.log(`Analytics API server running in setup mode on port ${PORT}`)

@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  analytics:
+    build: .
+    container_name: open-webui-analytics
+    ports:
+      - '3001:3001'
+    volumes:
+      - /home/ec2-user/openwebui/webui.db:/app/webui.db:ro
+    environment:
+      - DATABASE_URL=sqlite:////app/webui.db
+      - PORT=3001
