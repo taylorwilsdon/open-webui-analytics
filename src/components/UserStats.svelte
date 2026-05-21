@@ -172,6 +172,20 @@
                 </div>
               </div>
               
+              {#if user.models && user.models.length > 0}
+                <div class="user-models">
+                  <div class="models-label">Models Used</div>
+                  <div class="models-tags">
+                    {#each user.models as m}
+                      <span class="model-tag" title={m.model}>
+                        <span class="model-name">{m.model}</span>
+                        <span class="model-count">{m.count}</span>
+                      </span>
+                    {/each}
+                  </div>
+                </div>
+              {/if}
+              
               <div class="user-engagement">
                 <div class="engagement-bar-container">
                   <div class="engagement-bar-label">Engagement Level</div>
@@ -531,6 +545,73 @@
   
   .engagement-none {
     background: var(--text-muted);
+  }
+  
+  .user-models {
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--border);
+  }
+  
+  .models-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .models-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-height: 80px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  
+  .models-tags::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .models-tags::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .models-tags::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
+  
+  .model-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    font-family: monospace;
+    max-width: 100%;
+  }
+  
+  .model-name {
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .model-count {
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 0.05rem 0.25rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
   }
   
   @media (max-width: 768px) {
