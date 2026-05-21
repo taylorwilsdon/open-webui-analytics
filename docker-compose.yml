@@ -6,7 +6,7 @@ services:
     ports:
       - '3001:3001'
     volumes:
-      - /home/ec2-user/openwebui/webui.db:/app/webui.db:ro
+      - /home/ec2-user/openwebui:/app/data:ro
     environment:
-      - DATABASE_URL=sqlite:////app/webui.db
+      - DATABASE_URL=sqlite:////app/data/webui.db
       - PORT=3001

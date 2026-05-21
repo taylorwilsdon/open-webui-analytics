@@ -386,7 +386,7 @@ app.get('/api/stats/users', async (req, res) => {
         GROUP BY c.user_id
       ) as token_stats ON u.id = token_stats.user_id
       GROUP BY u.id, u.name, u.role
-      ORDER BY chat_count DESC
+      ORDER BY estimated_tokens DESC, chat_count DESC
       LIMIT 50
     `
     
@@ -412,15 +412,61 @@ app.get('/api/stats/users', async (req, res) => {
           GROUP BY c.user_id
         ) as token_stats ON u.id = token_stats.user_id
         GROUP BY u.id, u.name, u.role
-        ORDER BY chat_count DESC
+        ORDER BY estimated_tokens DESC, chat_count DESC
         LIMIT 50
       `
     }
     
     const users = await executeQuery(query)
+    
+    // Query models used by each user
+    let modelsQuery = `
+      SELECT 
+        c.user_id,
+        json_extract(msg.value, '$.model') as model,
+        COUNT(*) as usage_count
+      FROM chat c,
+           json_each(json_extract(c.chat, '$.history.messages')) as msg
+      WHERE json_extract(msg.value, '$.model') IS NOT NULL
+      GROUP BY c.user_id, model
+    `
+    if (isPostgreSQL) {
+      modelsQuery = `
+        SELECT 
+          c.user_id,
+          msg->>'model' as model,
+          COUNT(*) as usage_count
+        FROM chat c,
+             jsonb_array_elements(c.chat->'history'->'messages') as msg
+        WHERE msg->>'model' IS NOT NULL
+        GROUP BY c.user_id, model
+      `
+    }
+    
+    let userModels = []
+    try {
+      userModels = await executeQuery(modelsQuery)
+    } catch (err) {
+      console.error('Error querying user models:', err)
+    }
+    
+    // Group models by user_id
+    const modelsByUser = {}
+    userModels.forEach(row => {
+      if (!row.user_id) return
+      if (!modelsByUser[row.user_id]) {
+        modelsByUser[row.user_id] = []
+      }
+      modelsByUser[row.user_id].push({
+        model: row.model,
+        count: row.usage_count
+      })
+    })
+    
     const usersWithTokens = users.map(user => ({
       ...user,
-      estimated_tokens: Math.round(user.estimated_tokens || 0)
+      estimated_tokens: Math.round(user.estimated_tokens || 0),
+      models: modelsByUser[user.id] || []
     }))
     res.json(usersWithTokens)
   } catch (error) {
